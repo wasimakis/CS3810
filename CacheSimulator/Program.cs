@@ -16,7 +16,7 @@ namespace Cache_Simulator
         private const int MAXBITS = 860;
         //An array of 16-bit addresses that will simulated with cache misses and hits 
         private static ushort[] addresses = { 4, 8, 20, 24, 28, 36, 44, 20, 28, 36, 40, 44, 68, 72, 92, 96, 100, 104, 108, 112, 100, 112, 116, 120, 128, 140 };
-        //Main execution
+     
         static void Main(string[] args)
         {
             //Assuming no CPI could ever get this high. 
@@ -391,6 +391,6 @@ namespace Cache_Simulator
             avgCpi = cpi;
             return true;
         }
-        //We know that there are 32 bit address
+ 
     }
 }
