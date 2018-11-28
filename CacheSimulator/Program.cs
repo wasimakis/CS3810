@@ -19,17 +19,72 @@ namespace Cache_Simulator
         //Main execution
         static void Main(string[] args)
         {
+            //Assuming no CPI could ever get this high. 
+            double lowestCPI = 700;
+            int lowB = 0;
+            int lowR = 0;
+            int lowW = 0;
+            char lowA = 'g';
+            int dataBytes = 4;
+            int numRows = 1;
+            int numWays = 1; 
+            //======================ATTEMPT TO FIND FASTEST CACHE ARCHITECTURE===================================
+            for (int changeB = dataBytes; changeB <= 64; changeB = (int)Math.Pow(changeB, 2)) {
+                //Assuming the rows could never go past 40. 
+                for (int changeR = numRows; changeR <= 40; changeR++) {
+                    //Assuming the number of ways could not go past 4. 
+                    for (int changeW = numWays; changeW <= 4; changeW++) {
+                        for (int architecture = 0; architecture <= 2; architecture++) {
+                            char choose;
+                            switch (architecture) {
+                                case 0:
+                                    choose = 'f';
+                                    break;
+                                case 1:
+                                    choose = 'd';
+                                    break;
+                                case 2:
+                                    choose = 's';
+                                    break;
+                                default:
+                                    choose = 'f';
+                                    break;
+                            }
+                            if (Simulate(changeB, changeR, choose, changeW, out double avgCpi)) {
+                                if (avgCpi < lowestCPI) {
+                                    lowestCPI = avgCpi;
+                                    lowB = changeB;
+                                    lowR = changeR;
+                                    lowA = choose;
+                                    lowW = changeW;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            String arch = "";
+            switch (lowA) {
+                case 'f':
+                    arch = "Fully Associative";
+                    break;
+                case 'd':
+                    arch = "Direct Mapping";
+                    break;
+                case 's':
+                    arch = "Set Associative";
+                    break;
+            }
+            Console.WriteLine("The fastest cache architecture is a " + arch + " whose avg CPI is " + lowestCPI + ".  This architecture has " +  
+                lowW + " number of ways, " + lowB + " number of bytes and " + lowR + " amount of rows in the architecture");
             //The amount of Bytes per data chunk per row. 
-            int dataBytes = 8;
+             dataBytes = 16;
             //The amount of Rows for the cache system. 
-            int numRows = 4;
-            int numWays = 2;
-            //Simulate(dataBytes, numRows, 'f');
+             numRows = 2;
+             numWays = 3;
+           // Simulate(dataBytes, numRows,s', numWays, out double nothing);
             //Console.WriteLine("Finished Fully Associative Simulation");
-            Simulate(dataBytes, numRows, 's', numWays);
-            Console.WriteLine("Finished Direct Mapping Simulation");
-            // SimulateSA();
-            Console.WriteLine("Finished Set Associative Simulation!");
+            //Simulate(dataBytes, numRows, 's', numWays, out double nothing);
             Console.Read();
 
 
@@ -37,7 +92,7 @@ namespace Cache_Simulator
 
         //Simulates cache architecture for a specific amount of dataBytes and the number of rows. Different simulation options will mimic direct mapping or full or set
         //associativity. The num ways parameter is used exclusively to simulate  set associativity.
-        private static bool Simulate(int dataBytes, int numRows, char chooser, int numWays)
+        private static bool Simulate(int dataBytes, int numRows, char chooser, int numWays, out double avgCpi)
         {
             if (chooser == 'f')
             {
@@ -50,12 +105,13 @@ namespace Cache_Simulator
             //If we are using direct mapping, the tag bit amount is reduced due to additional space needed for mapping. 
             int directMap = 0;
             //Used to compute the reduced directmap due to a computational error. 
-            if (chooser == 'd')
+            if (chooser != 'f')
             {
                 double _dirMap = (Math.Log(numRows) / Math.Log(2));
                 if (_dirMap <= 0 || _dirMap % 1 != 0)
                 {
                     Console.WriteLine("Cannot compute for number of rows that are not a base of 2 or negative");
+                    avgCpi = Int16.MaxValue;
                     return false;
                 }
                 directMap = (int)_dirMap;
@@ -64,6 +120,7 @@ namespace Cache_Simulator
             if (_tagBits <= 0 || _tagBits % 1 != 0)
             {
                 Console.WriteLine("Cannot compute for amount of data bytes that are not a base of 2 or negative");
+                avgCpi = Int16.MaxValue;
                 return false;
             }
             tagBits = (int)_tagBits;
@@ -96,14 +153,14 @@ namespace Cache_Simulator
                 }
             }
 
-
-
+                     
             //Compute the total amount of bits that this cache structure will utilize:  
             int totalBits = (lruBits + tagBits + dataBits + 1) * numRows * numWays;
 
             if (totalBits > MAXBITS)
             {
                 Console.WriteLine("Cannot construct a cache of size " + totalBits + " because it is more than the maximum size of " + MAXBITS);
+                avgCpi = Int16.MaxValue;
                 return false;
             }
             Console.WriteLine("Current cache architecture has a total bit size of " + totalBits + ", which is within maximum size limit");
@@ -218,6 +275,7 @@ namespace Cache_Simulator
                     }
                     else
                     {
+                        avgCpi = Int16.MaxValue;
                         return false;
                     }
                     //---------------------FINISHED ATTEMPT AT FINDING TAG-----------------
@@ -330,6 +388,7 @@ namespace Cache_Simulator
             //Calculate the cycles per instruction. 
             double cpi = (hits + misses) / (double)((cycleAmount - 1) * addresses.Length);
             Console.WriteLine("Current average CPI of cache architecture: " + cpi);
+            avgCpi = cpi;
             return true;
         }
         //We know that there are 32 bit address
