@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Code by William Asimakis 
+//CS 3810 Study Assignment 8
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,11 +22,11 @@ namespace Cache_Simulator
             //The amount of Bytes per data chunk per row. 
             int dataBytes = 8;
             //The amount of Rows for the cache system. 
-            int numRows = 10;
-            int numWays = 1;
+            int numRows = 4;
+            int numWays = 2;
             //Simulate(dataBytes, numRows, 'f');
             //Console.WriteLine("Finished Fully Associative Simulation");
-            Simulate(dataBytes, numRows, 'f', numWays);
+            Simulate(dataBytes, numRows, 's', numWays);
             Console.WriteLine("Finished Direct Mapping Simulation");
             // SimulateSA();
             Console.WriteLine("Finished Set Associative Simulation!");
@@ -165,7 +167,7 @@ namespace Cache_Simulator
                                     hitRow = r;
                                     //break and set the hit to true;
                                     hit = true;
-                                    //Record the hit cycle penalties for a hit post first go around. 
+                                    //Record the hit cycle penalties for a hit post-first go around. 
                                     if (cycle != 1)
                                     {
                                         hits += 1;
@@ -175,7 +177,7 @@ namespace Cache_Simulator
                             }
                         }
                     }
-                    //For direct mapping or set associtivity
+                    //For direct mapping 
                     else if (chooser == 'd')
                     {
                         //We know the row from the equation to find the tag. 
@@ -194,7 +196,8 @@ namespace Cache_Simulator
                                 }
                             }
                         }
-                    }
+                    } 
+                    //For set associativity
                     else if (chooser == 's')
                     {
                         //Attempt to find the tag through full associtavity but with the corresponding direct mapped row. 
@@ -225,7 +228,7 @@ namespace Cache_Simulator
                             Console.Write("hit from row " + hitRow + "\n");
                         }
                         else {
-                            Console.Write("hit from row " + hitRow + " on cache way" + hitWay + "\n");
+                            Console.Write("hit from row " + hitRow + " on cache way " + hitWay + "\n");
                         }
                     }
                     //We didn't hit, which means we have to "cache". 
@@ -284,7 +287,7 @@ namespace Cache_Simulator
                                     Console.Write("miss - cached to row" + row + " in LRU cache way " + lruRow + "\n");
                                 }
                                 else {
-                                    Console.Write("miss - cached to LRU row" + lruRow + "\n");
+                                    Console.Write("miss - cached to LRU row " + lruRow + "\n");
                                 }
                                
                                 misses += CPENALTY + dataBytes;
